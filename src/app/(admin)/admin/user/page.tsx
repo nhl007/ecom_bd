@@ -29,7 +29,7 @@ const AdminUsers = () => {
     name: "",
     email: "",
     password: "",
-    role: "ADMIN",
+    role: "STAFF",
     emailVerified: null,
     id: "",
     image: null,
@@ -94,7 +94,7 @@ const AdminUsers = () => {
 
               <TableCell className="flex gap-1 items-center ">
                 {/* @ts-ignore */}
-                {session.data?.user.role === "Admin" ? (
+                {session.data?.user.role === "ADMIN" ? (
                   <>
                     <Button
                       onClick={() => {

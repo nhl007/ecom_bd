@@ -235,6 +235,7 @@ export const CartContextProvider = ({ children }: PropsWithChildren) => {
       total: 0,
       shipping: "Inside Dhaka",
     });
+    localStorage.removeItem("cart");
   };
 
   return (

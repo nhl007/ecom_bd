@@ -175,7 +175,7 @@ const DashBoard = () => {
             <TableBody>
               {lastTen.map((ten, i) => (
                 <TableRow key={ten.id}>
-                  <TableCell className="font-medium">{0 + 1}</TableCell>
+                  <TableCell className="font-medium">{1 + i}</TableCell>
                   <TableCell>
                     {new Date(ten.createdAt!).toLocaleDateString()}
                   </TableCell>
