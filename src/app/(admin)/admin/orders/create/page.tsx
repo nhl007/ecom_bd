@@ -5,6 +5,7 @@ import {
   getAllCouriers,
   getProducts,
 } from "@/actions/products";
+import LoadingSpinner from "@/components/Loading";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,11 +20,13 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { couriers, products } from "@/db/products.schema";
 import { X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useTransition } from "react";
 
 const AdminOrderCreate = () => {
+  const session = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -92,11 +95,14 @@ const AdminOrderCreate = () => {
     const data = await createNewOrder({
       products: cartProducts,
       total: total - discount + delivery,
-      courier: courierCus,
+      courier: courierCus ? courierCus : undefined,
       customer: customer,
       note: note,
       count: cartProducts.length,
       discount: discount,
+      invoice: "",
+      assigned: session.data?.user.name,
+      delivery: delivery,
     });
 
     setLoading(false);
@@ -133,6 +139,7 @@ const AdminOrderCreate = () => {
   };
   return (
     <MaxWidthWrapper className=" mb-8">
+      {pending && <LoadingSpinner />}
       <div className="min-w-full flex md:flex-row flex-col gap-2">
         {/* //? left side */}
 
@@ -159,7 +166,7 @@ const AdminOrderCreate = () => {
 
           <div className=" flex flex-col gap-2">
             <Label htmlFor="district">
-              CourierName <sup className=" text-red-500">*</sup>
+              Courier Name <sup className=" text-red-500">*</sup>
             </Label>
             <Select value={courierCus} onValueChange={(v) => setCourierCus(v)}>
               <SelectTrigger>

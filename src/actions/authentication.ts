@@ -141,7 +141,7 @@ export const signOutUser = async () => {
 
 export const deleteUserById = async (id: string) => {
   try {
-    const user = await db.delete(users).where(eq(users.id, id));
+    await db.delete(users).where(eq(users.id, id));
     return true;
   } catch (error) {
     return false;
@@ -151,6 +151,19 @@ export const deleteUserById = async (id: string) => {
 export const getAllUsers = async () => {
   try {
     const usersList = await db.select().from(users);
+    return usersList;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getAllUsersName = async () => {
+  try {
+    const usersList = await db
+      .select({
+        name: users.name,
+      })
+      .from(users);
     return usersList;
   } catch (error) {
     return null;

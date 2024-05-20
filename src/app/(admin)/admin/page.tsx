@@ -30,7 +30,9 @@ type TOBJ =
   | "Total Completed"
   | "Total Processing"
   | "Total Pending Payment"
-  | "Total Hold";
+  | "Total Hold"
+  | "Total Pending Delivery"
+  | "Total Pending Entry";
 
 const DashBoard = () => {
   const [pending, startTransition] = useTransition();
@@ -46,6 +48,8 @@ const DashBoard = () => {
     "Total Processing": 0,
     "Total Pending Payment": 0,
     "Total Hold": 0,
+    "Total Pending Delivery": 0,
+    "Total Pending Entry": 0,
   });
 
   const [todaysData, setTodaysData] = useState({
@@ -113,7 +117,7 @@ const DashBoard = () => {
             data={data["Total Processing"]}
           />
         </Link>
-        <Link href="admin/orders?status=Pending">
+        <Link href="admin/orders?status=Pending Payment">
           <AdminDashBoardInfoBox
             name={"Total Pending Payment"}
             data={data["Total Pending Payment"]}
@@ -136,6 +140,19 @@ const DashBoard = () => {
           <AdminDashBoardInfoBox
             name={"Total Hold"}
             data={data["Total Cancelled"]}
+          />
+        </Link>
+
+        <Link href="admin/orders?status=Pending Delivery">
+          <AdminDashBoardInfoBox
+            name={"Total Pending Delivery"}
+            data={data["Total Pending Delivery"]}
+          />
+        </Link>
+        <Link href="admin/orders?entry=true">
+          <AdminDashBoardInfoBox
+            name={"Total Pending Entry"}
+            data={data["Total Pending Entry"]}
           />
         </Link>
       </div>
@@ -161,7 +178,7 @@ const DashBoard = () => {
         </div>
 
         <div className=" col-span-2 px-6 py-4 bg-slate-50 rounded-xl">
-          <h1 className=" mt-2 mb-4 pb-2.5 border-b-2">{`Today's Report`}</h1>
+          <h1 className=" mt-2 mb-4 pb-2.5 border-b-2">Recent Sales</h1>
           <Table>
             <TableHeader>
               <TableRow>

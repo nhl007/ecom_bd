@@ -6,14 +6,21 @@ import {
   Document,
   StyleSheet,
   Image,
+  Font,
 } from "@react-pdf/renderer";
 import { orders } from "@/db/products.schema";
+
+Font.register({
+  family: "Noto Sans Bengali",
+  src: "https://fonts.gstatic.com/s/notosansbengali/v20/Cn-SJsCGWQxOjaGwMQ6fIiMywrNJIky6nvd8BjzVMvJx2mcSPVFpVEqE-6KmsolLudA.ttf",
+});
 
 // Create styles
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#E4E4E4",
     padding: "24px",
+    fontFamily: "Noto Sans Bengali",
   },
   container: {
     display: "flex",
@@ -41,7 +48,14 @@ const styles = StyleSheet.create({
 
 type TReactPdfDoc = Pick<
   typeof orders.$inferSelect,
-  "createdAt" | "customer" | "total" | "shipping" | "products" | "id"
+  | "createdAt"
+  | "customer"
+  | "total"
+  | "shipping"
+  | "products"
+  | "invoice"
+  | "delivery"
+  | "discount"
 >;
 
 interface IReactPdfDoc {
@@ -52,7 +66,7 @@ export const ReactPdfDoc = ({ data }: IReactPdfDoc) => (
   <Document>
     <Page size="A4" style={styles.page}>
       {data.map((o) => (
-        <View key={o.id} style={styles.container}>
+        <View key={o.invoice} style={styles.container}>
           <View style={styles.header}>
             {/* @ts-ignore */}
             <Image style={styles.image} src="/logo.png" alt="logo" />
@@ -62,7 +76,7 @@ export const ReactPdfDoc = ({ data }: IReactPdfDoc) => (
                 flexDirection: "column",
               }}
             >
-              <Text style={styles.textBold}>Invoice#{o.id.slice(0, 8)}</Text>
+              <Text style={styles.textBold}>Invoice#{o.invoice}</Text>
               <Text style={styles.textBold}>
                 Date: {new Date(o.createdAt!).toLocaleDateString().slice(0, 9)}
               </Text>
@@ -196,10 +210,38 @@ export const ReactPdfDoc = ({ data }: IReactPdfDoc) => (
                   textAlign: "center",
                 }}
               >
-                {o.total}
+                {o.products.reduce((acc, p) => acc + p.price * p.quantity!, 0)}
               </Text>
             </View>
 
+            <View
+              style={{
+                width: "100%",
+                textAlign: "right",
+                border: "2px",
+                borderTop: "0px",
+                display: "flex",
+                flexDirection: "row",
+              }}
+            >
+              <Text
+                style={{
+                  width: "80%",
+                  borderRight: "2px",
+                  paddingRight: "8px",
+                }}
+              >
+                Discount (-)
+              </Text>
+              <Text
+                style={{
+                  width: "20%",
+                  textAlign: "center",
+                }}
+              >
+                {o.discount}
+              </Text>
+            </View>
             <View
               style={{
                 width: "100%",
@@ -225,7 +267,7 @@ export const ReactPdfDoc = ({ data }: IReactPdfDoc) => (
                   textAlign: "center",
                 }}
               >
-                {o.shipping === "Inside Dhaka" ? 90 : 120}
+                {o.delivery}
               </Text>
             </View>
             <View

@@ -1,7 +1,6 @@
 "use server";
 
 import db from "@/configs/db";
-import { preferences } from "@/db/preferences.schema";
 import {
   products,
   orders,
@@ -9,7 +8,7 @@ import {
   couriers,
   sliders,
 } from "@/db/products.schema";
-import { and, desc, eq, gte, ilike, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, isNull, sql } from "drizzle-orm";
 import {
   unstable_noStore as noStore,
   unstable_cache as cache,
@@ -110,9 +109,17 @@ export const getProducts = cache(
 
 export const createNewOrder = async (data: typeof orders.$inferInsert) => {
   try {
+    const prev = await db
+      .select({ serial: orders.serial })
+      .from(orders)
+      .orderBy(desc(orders.serial))
+      .limit(1);
+
+    const sku = "INV" + (prev.length ? prev[0].serial + 1 : "1");
+
     const order = await db
       .insert(orders)
-      .values(data)
+      .values({ ...data, invoice: sku })
       .returning({ id: orders.id });
 
     data.products.forEach((element) => {
@@ -166,7 +173,11 @@ export const getOrders = cache(
   async (limit?: number, page?: number) => {
     try {
       const skip = ((page ? page : 1) - 1) * (limit ? limit : 20);
-      const order = await db.select().from(orders).offset(skip);
+      const order = await db
+        .select()
+        .from(orders)
+        .offset(skip)
+        .orderBy(desc(orders.createdAt));
       if (order.length) return order;
       return null;
     } catch (error) {
@@ -189,6 +200,7 @@ export const filterOrders = cache(
       | "Processing"
       | null;
     phone?: string | null;
+    pendingEntry?: boolean;
   }) => {
     try {
       const order = await db
@@ -198,9 +210,11 @@ export const filterOrders = cache(
           and(
             query.courier ? eq(orders.courier, query.courier) : undefined,
             query.status ? eq(orders.status, query.status) : undefined,
-            query.phone ? sql`customer->>'phone' = ${query.phone}` : undefined
+            query.phone ? sql`customer->>'phone' = ${query.phone}` : undefined,
+            query.pendingEntry ? isNull(orders.courier) : undefined
           )
-        );
+        )
+        .orderBy(desc(orders.createdAt));
       if (order.length) return order;
       return null;
     } catch (error) {
@@ -229,6 +243,7 @@ export const getLastTenOrders = cache(
   ["get-last-ten"],
   {
     tags: ["orders"],
+    revalidate: 3600 * 24,
   }
 );
 
@@ -259,6 +274,7 @@ export const updateOrder = async (data: typeof orders.$inferInsert) => {
         customer: data.customer,
         shipping: data.shipping,
         products: data.products,
+        assigned: data.assigned,
       })
       .where(eq(orders.id, data.id as string));
 
@@ -347,6 +363,8 @@ export const getDashBoardData = cache(
       "Total Processing": 0,
       "Total Pending Payment": 0,
       "Total Hold": 0,
+      "Total Pending Delivery": 0,
+      "Total Pending Entry": 0,
     };
 
     try {
@@ -362,6 +380,11 @@ export const getDashBoardData = cache(
         // !total
         dashboard["Total Revenue"] = dashboard["Total Revenue"] + order.total;
 
+        if (!order.courier) {
+          dashboard["Total Pending Entry"] =
+            dashboard["Total Pending Entry"] + 1;
+        }
+
         //!order status
         if (order.status && order.status === "Delivered") {
           dashboard["Total Completed"] = dashboard["Total Completed"] + 1;
@@ -371,6 +394,9 @@ export const getDashBoardData = cache(
           dashboard["Total Cancelled"] = dashboard["Total Cancelled"] + 1;
         } else if (order.status && order.status === "Hold") {
           dashboard["Total Hold"] = dashboard["Total Hold"] + 1;
+        } else if (order.status && order.status === "Pending Delivery") {
+          dashboard["Total Pending Delivery"] =
+            dashboard["Total Pending Delivery"] + 1;
         } else
           dashboard["Total Pending Payment"] =
             dashboard["Total Pending Payment"] + 1;
@@ -400,6 +426,8 @@ export const getOrderData = cache(
       Completed: 0,
       Hold: 0,
       Pending: 0,
+      "Pending Delivery": 0,
+      Entry: 0,
     };
 
     try {
@@ -412,6 +440,8 @@ export const getOrderData = cache(
         .where(!today ? undefined : gte(orders.createdAt, last24Hours));
 
       orderDetails.forEach((order) => {
+        if (!order.courier) dashboard.Entry = dashboard.Entry + 1;
+
         //!order status
         if (order.status && order.status === "Delivered") {
           dashboard["Completed"] = dashboard["Completed"] + 1;
@@ -421,6 +451,8 @@ export const getOrderData = cache(
           dashboard["Cancelled"] = dashboard["Cancelled"] + 1;
         } else if (order.status && order.status === "Hold") {
           dashboard["Hold"] = dashboard["Hold"] + 1;
+        } else if (order.status && order.status === "Pending Delivery") {
+          dashboard["Pending Delivery"] = dashboard["Pending Delivery"] + 1;
         } else dashboard["Pending"] = dashboard["Pending"] + 1;
       });
 
@@ -434,6 +466,7 @@ export const getOrderData = cache(
   ["get-order-data"],
   {
     tags: ["orders", "order_data"],
+    revalidate: 24 * 3600,
   }
 );
 

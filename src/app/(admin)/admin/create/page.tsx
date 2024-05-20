@@ -14,11 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  categories,
-  productCategoryEnum,
-  products,
-} from "@/db/products.schema";
+import { categories, products } from "@/db/products.schema";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";

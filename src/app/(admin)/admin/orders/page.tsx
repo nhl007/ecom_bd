@@ -13,11 +13,13 @@ type TSteadFastApiPostParams = {
 
 type TOBJ =
   | "Order"
-  | "Pending"
+  | "Pending Delivery"
   | "Cancelled"
   | "Delivered"
   | "Hold"
-  | "Processing";
+  | "Processing"
+  | "Pending Payment"
+  | "Entry";
 
 import {
   deleteOrderById,
@@ -58,10 +60,33 @@ import AdminDashBoardInfoBox from "@/components/AdminDashBoardInfoBox";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { CSVLink } from "react-csv";
+import { getAllUsersName } from "@/actions/authentication";
+
 type IReactPdfDoc = Pick<
   typeof orders.$inferSelect,
-  "createdAt" | "customer" | "total" | "shipping" | "products" | "id"
+  | "createdAt"
+  | "customer"
+  | "total"
+  | "shipping"
+  | "products"
+  | "invoice"
+  | "delivery"
+  | "discount"
 >;
+
+type IReactExcelDoc = {
+  invoice: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_address: string;
+  amount: number;
+  created_at: string;
+  products: string;
+  assigned_to: string;
+  courier: string;
+  shipping: string;
+};
 
 const OrderAdmin = () => {
   const [orderData, setOrdersData] = useState<(typeof orders.$inferSelect)[]>(
@@ -76,11 +101,13 @@ const OrderAdmin = () => {
   const [pending, startTransition] = useTransition();
   const [dash, setDash] = useState({
     Order: 0,
-    Pending: 0,
+    "Pending Payment": 0,
     Cancelled: 0,
     Delivered: 0,
     Hold: 0,
     Processing: 0,
+    "Pending Delivery": 0,
+    Entry: 0,
   });
 
   const [phoneQuery, setPhoneQuery] = useState<string>();
@@ -95,24 +122,31 @@ const OrderAdmin = () => {
     // const courierParam = searchP.get("courier");
     const phone = searchP.get("phone");
     const status = searchP.get("status");
+    const entry = searchP.get("entry");
+
     startTransition(async () => {
       const courier = await getAllCouriers();
+
       if (courier) setCourierList(courier);
 
       const ord = await filterOrders({
         courier: courierCus,
         phone: phone,
+        pendingEntry: !!entry ? true : false,
         // @ts-ignore
         status: [
           "Delivered",
-          "Pending",
+          "Pending Payment",
           "Cancelled",
           "Hold",
           "Processing",
+          "Pending Delivery",
+          "Entry",
         ].includes(status!)
           ? status
           : null,
       });
+
       if (!ord) {
         return setOrdersData([]);
       }
@@ -120,6 +154,10 @@ const OrderAdmin = () => {
       setOrdersData(ord);
     });
   }, [searchP, courierCus]);
+
+  useEffect(() => {
+    orderLoad();
+  }, [orderLoad]);
 
   useEffect(() => {
     const orderDataInit = async () => {
@@ -131,9 +169,11 @@ const OrderAdmin = () => {
             Order: 0,
             Delivered: 0,
             Cancelled: 0,
-            Pending: 0,
             Hold: 0,
             Processing: 0,
+            "Pending Delivery": 0,
+            "Pending Payment": 0,
+            Entry: 0,
           };
         });
       setDash(() => {
@@ -141,19 +181,17 @@ const OrderAdmin = () => {
           Order: da.Order,
           Delivered: da.Completed,
           Cancelled: da.Cancelled,
-          Pending: da.Pending,
+          "Pending Delivery": da["Pending Delivery"],
+          "Pending Payment": da.Pending,
           Hold: da.Hold,
           Processing: da.Processing,
+          Entry: da.Entry,
         };
       });
     };
 
     orderDataInit();
   }, []);
-
-  useEffect(() => {
-    orderLoad();
-  }, [orderLoad]);
 
   const handleCheckboxChange = (id: string) => {
     setSelected((prevState) => {
@@ -163,6 +201,27 @@ const OrderAdmin = () => {
         return [...prevState, id];
       }
     });
+
+    const data = orderData.find((data) => data.id === id);
+    if (!data) return;
+    const productName = data.products
+      .map((v) => v.name + `(${v.quantity})`)
+      .join(", ");
+    setCsvData((prev) => [
+      ...prev,
+      {
+        created_at: String(data.createdAt),
+        assigned_to: "hello",
+        customer_address: data.customer.address,
+        customer_name: data.customer.name,
+        customer_phone: data.customer.phone,
+        courier: data.courier ?? "",
+        invoice: data.id,
+        products: productName,
+        shipping: data.shipping ?? "",
+        amount: data.total,
+      },
+    ]);
   };
 
   const bulkUpdateSteadFast = async () => {
@@ -204,6 +263,8 @@ const OrderAdmin = () => {
 
   const [pdfData, setPdfData] = useState<IReactPdfDoc[]>([]);
 
+  const [csvData, setCsvData] = useState<IReactExcelDoc[]>([]);
+
   const bulkPrintPdf = () => {
     const data = orderData.filter((data) => selected.includes(data.id));
     if (data.length === 0)
@@ -214,6 +275,18 @@ const OrderAdmin = () => {
     setPdfData(data);
     setShowPdf(true);
   };
+
+  const [userList, setUserList] = useState(["string"]);
+
+  const getAllUsersList = async () => {
+    const users = await getAllUsersName();
+    if (!users) return;
+    setUserList(users.map((u) => u.name));
+  };
+
+  useEffect(() => {
+    getAllUsersList();
+  }, []);
 
   return (
     <div>
@@ -230,9 +303,22 @@ const OrderAdmin = () => {
         <>
           <div className=" grid grid-cols-4 gap-x-4 gap-y-4 mt-4 mb-8 ">
             {Object.keys(dash).map((d) => (
-              <Link key={d} href={`/admin/orders?status=${d}`}>
+              <Link
+                key={d}
+                href={`/admin/orders?status=${
+                  d === "Pending"
+                    ? d + " Payment"
+                    : d === "Entry"
+                    ? "null&entry=true"
+                    : d
+                }`}
+              >
                 <AdminDashBoardInfoBox
-                  name={"Total " + d + (d === "Pending" ? " Payment" : "")}
+                  name={
+                    d === "Entry"
+                      ? "Pending Entry"
+                      : "Total " + d + (d === "Pending" ? " Payment" : "")
+                  }
                   data={dash[d as TOBJ]}
                   className={
                     d === "Total"
@@ -251,24 +337,43 @@ const OrderAdmin = () => {
               </Link>
             ))}
           </div>
-          {/* <OrderPageInfos data={orderData} selected={selected} /> */}
 
           <div className=" flex justify-between mt-4 mb-6 items-center">
-            <div className="  flex gap-5">
+            <div className="  flex gap-3">
               <Link
-                className=" py-2 px-4 bg-amber-800 hover:bg-main_accent rounded-md text-white"
+                className=" py-2 px-3 text-sm bg-amber-800 hover:bg-main_accent rounded-md text-white"
                 href="/admin/orders/create"
               >
-                Create an Order
+                Add Order
               </Link>
-              <Button className=" bg-blue-950" onClick={bulkUpdateSteadFast}>
+              <Button
+                size="sm"
+                className=" bg-blue-950"
+                onClick={bulkUpdateSteadFast}
+              >
                 Stead Fast Export
               </Button>
-              <Button className="bg-teal-900" onClick={bulkPrintPdf}>
-                Print Pdf
+              <Button size="sm" className="bg-teal-900" onClick={bulkPrintPdf}>
+                Print invoice
               </Button>
+              <CSVLink
+                className=" text-sm bg-lime-700 text-white px-3 py-2 rounded-sm"
+                data={csvData}
+                filename="oasis.xls"
+                onClick={() => {
+                  if (csvData.length === 0) {
+                    toast({
+                      title: "Please select a row first",
+                      variant: "destructive",
+                    });
+                    return false;
+                  }
+                }}
+              >
+                Export Excel
+              </CSVLink>
             </div>
-            <div className=" flex gap-5">
+            <div className=" flex gap-3">
               <Select
                 value={courierCus}
                 onValueChange={(v) => setCourierCus(v)}
@@ -321,20 +426,42 @@ const OrderAdmin = () => {
                       if (e.target.checked) {
                         const ids = orderData.map((o) => o.id);
                         setSelected(ids);
+
+                        const data = orderData
+                          .filter((data) => ids.includes(data.id))
+                          .map((or) => {
+                            const productName = or.products
+                              .map((v) => v.name + `(${v.quantity})`)
+                              .join(", ");
+
+                            return {
+                              created_at: String(or.createdAt),
+                              assigned_to: "hello",
+                              customer_address: or.customer.address,
+                              customer_name: or.customer.name,
+                              customer_phone: or.customer.phone,
+                              courier: or.courier ?? "",
+                              invoice: or.id,
+                              products: productName,
+                              shipping: or.shipping ?? "",
+                              amount: or.total,
+                            };
+                          });
+                        setCsvData(data);
                       } else setSelected([]);
                     }}
                   />
                 </TableHead>
-                <TableHead>Invoice</TableHead>
+                <TableHead>SI.</TableHead>
+                <TableHead>Invoice ID</TableHead>
+                <TableHead>Customer Info</TableHead>
                 <TableHead>Products</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Shipping Info</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Note</TableHead>
-
-                <TableHead>Payment</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Total</TableHead>
                 <TableHead className="text-right">Created At</TableHead>
+                <TableHead className="text-right">Assigned</TableHead>
+
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -350,38 +477,23 @@ const OrderAdmin = () => {
                       onChange={() => handleCheckboxChange(o.id)}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{o.id}</TableCell>
-                  <TableCell className="font-medium min-w-[300px]">
-                    {o.products.map((p) => (
-                      <div className=" flex flex-col gap-1" key={p.id}>
-                        <div className=" flex gap-1 items-center justify-between">
-                          <Image
-                            src={
-                              p.image?.length ? p.image[0].url : "/fallback.png"
-                            }
-                            width={60}
-                            height={60}
-                            alt="img"
-                          />
-                          <X size={18} />
-                          <span>{p.quantity}</span>
-                          <span>
-                            Sub Total:{" "}
-                            {(p.discountPrice ? p.discountPrice : p.price) *
-                              p.quantity!}{" "}
-                          </span>
-                        </div>
-                        <p>{p.name}</p>
-                      </div>
-                    ))}
-                  </TableCell>
-
+                  <TableCell className="font-medium">{i + 1}</TableCell>
+                  <TableCell className="font-medium">{o.invoice}</TableCell>
                   <TableCell className="font-medium">
                     <p>{o.customer.name}</p>
                     <p>{o.customer.phone}</p>
                     <p>{o.customer.address}</p>
                   </TableCell>
-                  <TableCell>{o.shipping}</TableCell>
+                  <TableCell className="font-medium">
+                    {o.products.map((p) => (
+                      <div className=" flex gap-2" key={p.id}>
+                        <span>{p.quantity}</span>
+                        <X size={18} />
+                        <span>{p.name}</span>
+                      </div>
+                    ))}
+                  </TableCell>
+
                   <TableCell>
                     <Select
                       value={o.status ?? "Pending"}
@@ -423,13 +535,49 @@ const OrderAdmin = () => {
                     </Select>
                   </TableCell>
                   <TableCell>{o.note}</TableCell>
-                  <TableCell>{o.payment}</TableCell>
                   <TableCell className="text-right">{o.total}</TableCell>
+
                   <TableCell className="text-right">
                     {new Date(o.createdAt!).toLocaleDateString()}
                   </TableCell>
+                  <TableCell className="text-right">
+                    <Select
+                      value={o.assigned?.trim() ?? ""}
+                      onValueChange={async (value) => {
+                        // @ts-ignore
+                        setOrdersData((prev) => {
+                          const newVal = prev.map((val) => {
+                            if (val.id === o.id)
+                              return { ...val, assigned: value };
+                            return val;
+                          });
+                          return newVal;
+                        });
+                        // @ts-ignore
+                        await updateOrder({ ...o, assigned: value });
+                        console.log(value);
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "focus-visible:outline-none focus:outline-none max-w-fit"
+                        )}
+                      >
+                        <SelectValue placeholder="Assign Order To:" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {userList.map((v) => (
+                            <SelectItem key={v} value={v}>
+                              {v}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
 
-                  <TableCell className=" flex items-center">
+                  <TableCell className=" flex flex-col justify-center items-center">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -438,10 +586,12 @@ const OrderAdmin = () => {
                           {
                             createdAt: o.createdAt,
                             customer: o.customer,
-                            id: o.id,
+                            invoice: o.invoice,
                             products: o.products,
                             total: o.total,
                             shipping: o.shipping,
+                            delivery: o.delivery,
+                            discount: o.discount,
                           },
                         ]);
                         setShowPdf(true);
