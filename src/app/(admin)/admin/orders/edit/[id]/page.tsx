@@ -6,6 +6,7 @@ import {
   getProducts,
   updateOrderById,
 } from "@/actions/products";
+import LoadingSpinner from "@/components/Loading";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,6 +152,7 @@ const AdminOrderCreate = () => {
   };
   return (
     <MaxWidthWrapper className=" mb-8">
+      {pending && <LoadingSpinner />}
       <div className="min-w-full flex md:flex-row flex-col gap-2">
         {/* //? left side */}
 

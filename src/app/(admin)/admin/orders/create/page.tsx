@@ -100,7 +100,6 @@ const AdminOrderCreate = () => {
       note: note,
       count: cartProducts.length,
       discount: discount,
-      invoice: "",
       assigned: session.data?.user.name,
       delivery: delivery,
     });

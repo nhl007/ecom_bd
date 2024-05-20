@@ -107,7 +107,9 @@ export const getProducts = cache(
   }
 );
 
-export const createNewOrder = async (data: typeof orders.$inferInsert) => {
+export const createNewOrder = async (
+  data: Omit<typeof orders.$inferInsert, "invoice">
+) => {
   try {
     const prev = await db
       .select({ serial: orders.serial })
@@ -141,7 +143,7 @@ export const createNewOrder = async (data: typeof orders.$inferInsert) => {
 
 export const updateOrderById = async (
   id: string,
-  data: typeof orders.$inferInsert
+  data: Omit<typeof orders.$inferInsert, "invoice">
 ) => {
   try {
     const order = await db
