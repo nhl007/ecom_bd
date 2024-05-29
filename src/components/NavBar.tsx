@@ -19,6 +19,7 @@ const NavBar = () => {
   const url = usePathname();
   const [menu, setMenu] = useState(false);
   const [phone, setPhone] = useState("");
+  const [logo, setLogo] = useState("");
 
   const [category, setCategory] = useState<(typeof categories.$inferSelect)[]>(
     []
@@ -30,7 +31,10 @@ const NavBar = () => {
     startTransition(async () => {
       const category = await getAllCategories(true);
       const preference = await getPreferences();
-      if (preference) setPhone(preference.phone);
+      if (preference) {
+        setLogo(preference.logo.url);
+        setPhone(preference.phone);
+      }
       if (category) setCategory(category);
     });
   };
@@ -51,7 +55,7 @@ const NavBar = () => {
 
         <Link href="/">
           <Image
-            src="/logo.jpg"
+            src={logo}
             alt="logo"
             height="80"
             width="80"

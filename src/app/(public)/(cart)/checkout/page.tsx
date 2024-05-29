@@ -31,6 +31,7 @@ const Page = () => {
       const fShip = await getAllShipping();
       if (fShip) {
         setShip(fShip);
+        updateShipping(fShip[0].name, fShip[0].cost);
       }
     });
   };
@@ -80,31 +81,29 @@ const Page = () => {
         variant: "destructive",
       });
 
-    startTransition(async () => {
-      const delivery = ship.find((sh) => sh.name === cart.shipping);
+    const delivery = ship.find((sh) => sh.name === cart.shipping);
 
-      const data = await createNewOrder({
-        ...cart,
-        customer: customer,
-        note: note,
-        delivery: delivery?.cost!,
-      });
-      if (data.success) {
-        clearCart();
-        router.push(`/order-complete?order=${data.message}`);
-        toast({
-          title: "Order!",
-          description: "Order Successfully completed!",
-          variant: "success",
-        });
-      } else {
-        toast({
-          title: "Order!",
-          description: data.message,
-          variant: "destructive",
-        });
-      }
+    const data = await createNewOrder({
+      ...cart,
+      customer: customer,
+      note: note,
+      delivery: delivery?.cost!,
     });
+    if (data.success) {
+      clearCart();
+      router.push(`/order-complete?order=${data.message}`);
+      toast({
+        title: "Order!",
+        description: "Order Successfully completed!",
+        variant: "success",
+      });
+    } else {
+      toast({
+        title: "Order!",
+        description: data.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCustomerDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +117,7 @@ const Page = () => {
         {/* //? left side */}
 
         <div className=" flex-1 px-3 py-10 flex flex-col gap-4">
-          <p className=" text-red-400">
+          <p className=" text-red-600 text-xl font-semibold">
             অর্ডারটি কনফার্ম করতে আপনার নাম, ঠিকানা, মোবাইল নাম্বার, লিখে অর্ডার
             কনফার্ম করুন বাটনে ক্লিক করুন
           </p>
@@ -140,6 +139,30 @@ const Page = () => {
             </Label>
             <Input onChange={handleCustomerDataChange} name="address" />
           </div>
+          <div className=" flex flex-col gap-2">
+            <Label htmlFor="ship">
+              আপনার এরিয়া সিলেক্ট করুন<sup className=" text-red-500">*</sup>
+            </Label>
+            <div className="flex justify-between border-b-[1px] py-3">
+              <select
+                onChange={(e) => {
+                  const data = e.target.value.split("/");
+                  updateShipping(data[0], Number(data[1]));
+                }}
+                className=" px-3 py-2.5 rounded-md border"
+              >
+                {ship?.map((sh, i) => (
+                  <option
+                    key={sh.name}
+                    value={sh.name + "/" + sh.cost}
+                    selected={i === 0}
+                  >
+                    {sh.name + ` ( ${sh.cost} ) `}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className=" flex flex-col gap-2">
             <Label htmlFor="note">
@@ -149,7 +172,7 @@ const Page = () => {
               onChange={(e) => setNote(e.target.value)}
               name="note"
               rows={7}
-              className=" outline-none border-[1px] rounded-md"
+              className=" outline-none border-[1px] rounded-md pl-2"
             />
           </div>
         </div>
@@ -189,27 +212,7 @@ const Page = () => {
 
               <p>{cart.total - cart.delivery!}৳</p>
             </div>
-            <div className="flex justify-between border-b-[1px] py-3">
-              <p>Shipping</p>
-              <div>
-                {ship.map((sh) => (
-                  <div
-                    key={sh.name + sh.serial}
-                    className="flex gap-2 justify-end"
-                  >
-                    <label className="text-sm">
-                      {sh.name + ` (${sh.cost})`}
-                    </label>
-                    <input
-                      checked={cart.shipping === sh.name ? true : false}
-                      onChange={(e) => updateShipping(e.target.value, sh.cost)}
-                      value={sh.name}
-                      type="radio"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+
             <div className="flex justify-between border-b-2 py-3">
               <p>Total</p>
               <p className=" text-4xl">{cart.total}৳</p>

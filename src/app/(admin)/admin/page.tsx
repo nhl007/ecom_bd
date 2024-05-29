@@ -59,6 +59,7 @@ const DashBoard = () => {
     Cancelled: 0,
     Completed: 0,
     Hold: 0,
+    Entry: 0,
   });
 
   const [lastTen, setLastTen] = useState<(typeof orders.$inferSelect)[]>([]);
@@ -169,7 +170,13 @@ const DashBoard = () => {
                 )}
                 key={d}
               >
-                <span>{d}</span>
+                <span>
+                  {d === "Entry"
+                    ? "Pending Entry"
+                    : d === "Pending"
+                    ? "Pending Payment"
+                    : d}
+                </span>
                 {/*@ts-ignore */}
                 <span>{todaysData[d]}</span>
               </div>

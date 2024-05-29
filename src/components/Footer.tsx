@@ -14,7 +14,7 @@ const Footer = async () => {
           <div className=" flex flex-col gap-2 text-sm md:text-base">
             <Link href="/">
               <Image
-                src="/logo.jpg"
+                src={preference?.logo ? preference.logo.url : "/logo.jpg"}
                 alt="logo"
                 height="80"
                 width="80"
@@ -23,9 +23,8 @@ const Footer = async () => {
             </Link>
 
             <div className="flex items-center gap-2 text">
-              <NavigationIcon size={18} />{" "}
+              <NavigationIcon size={18} />
               <span>
-                {" "}
                 {preference ? preference.address : `Nandipara, Basabo, 1214`}
               </span>
             </div>
@@ -80,7 +79,7 @@ const Footer = async () => {
         </div>
       </MaxWidthWrapper>
       <div className="py-6  border-t-[1px] border-t-gray-200 text-center">
-        <span>Copyright © 2024 | Burnamala</span>
+        <span>{preference?.copyright}</span>
       </div>
     </footer>
   );

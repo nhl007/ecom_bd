@@ -3,14 +3,16 @@ import Link from "next/link";
 
 import { auth } from "@/configs/auth";
 import AdminProfileDropdown from "./AdminProfileDropdown";
+import { getPreferences } from "@/actions/preference";
 
 const AdminTopNavBar = async () => {
   const session = await auth();
+  const pref = await getPreferences();
   return (
     <div className=" w-full fixed inset-0 bg-gray-100 text-black h-[12%] z-[999] px-4 flex justify-between items-center">
       <Link href="/">
         <Image
-          src="/logo.jpg"
+          src={pref?.logo.url ?? "/logo.png"}
           alt="logo"
           height="60"
           width="60"

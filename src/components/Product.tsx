@@ -14,10 +14,9 @@ const Product = ({
   discountPercentage,
   image,
   category,
-  quantity,
   stock,
 }: typeof products.$inferSelect) => {
-  const { addToCart } = useCartContext();
+  const { addToCart, clearCart } = useCartContext();
 
   const router = useRouter();
 
@@ -54,6 +53,7 @@ const Product = ({
       <Button
         className="z-50"
         onClick={() => {
+          clearCart();
           addToCart({
             name,
             price: discountPrice ? discountPrice : price,

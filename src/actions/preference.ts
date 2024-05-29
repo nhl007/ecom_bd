@@ -65,6 +65,8 @@ export const getPreferences = cache(
         .select({
           phone: preferences.phone,
           address: preferences.address,
+          logo: preferences.logo,
+          copyright: preferences.copyRight,
         })
         .from(preferences);
 

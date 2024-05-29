@@ -53,7 +53,6 @@ import { couriers, orders, orderStatusEnum } from "@/db/products.schema";
 import { cn } from "@/lib/utils";
 import { PDFViewer } from "@react-pdf/renderer";
 import { DeleteIcon, FileEditIcon, PrinterIcon, X } from "lucide-react";
-import Image from "next/image";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "@/components/ui/use-toast";
 import AdminDashBoardInfoBox from "@/components/AdminDashBoardInfoBox";
@@ -76,16 +75,15 @@ type IReactPdfDoc = Pick<
 >;
 
 type IReactExcelDoc = {
-  invoice: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_address: string;
-  amount: number;
-  created_at: string;
-  products: string;
-  assigned_to: string;
-  courier: string;
-  shipping: string;
+  "Order Date": string;
+  "Order Id": string;
+  Name: string;
+  Address: string;
+  Number: string;
+  "Total Amount": number;
+  "Item Name": string;
+  Quantity: number;
+  "Shipping Method": string;
 };
 
 const OrderAdmin = () => {
@@ -207,57 +205,57 @@ const OrderAdmin = () => {
     const productName = data.products
       .map((v) => v.name + `(${v.quantity})`)
       .join(", ");
+
     setCsvData((prev) => [
       ...prev,
       {
-        created_at: String(data.createdAt),
-        assigned_to: "hello",
-        customer_address: data.customer.address,
-        customer_name: data.customer.name,
-        customer_phone: data.customer.phone,
-        courier: data.courier ?? "",
-        invoice: data.id,
-        products: productName,
-        shipping: data.shipping ?? "",
-        amount: data.total,
+        "Order Date": String(data.createdAt),
+        "Order Id": data.invoice,
+        Name: data.customer.name,
+        Address: data.customer.address,
+        Number: data.customer.phone,
+        "Total Amount": data.total,
+        "Item Name": productName,
+        Quantity: data.products[0].quantity!,
+        "Shipping Method": data.shipping ?? "",
       },
     ]);
   };
 
-  const bulkUpdateSteadFast = async () => {
-    if (selected.length === 0)
-      return toast({
-        title: "Please select a row first",
-        variant: "destructive",
-      });
+  // const bulkUpdateSteadFast = async () => {
+  //   if (selected.length === 0)
+  //     return toast({
+  //       title: "Please select a row first",
+  //       variant: "destructive",
+  //     });
 
-    const updateData: TSteadFastApiPostParams[] = [];
+  //   const updateData: TSteadFastApiPostParams[] = [];
 
-    orderData.forEach((o) => {
-      if (selected.includes(o.id)) {
-        updateData.push({
-          cod_amount: o.total,
-          invoice: o.id,
-          note: o.note ?? "No notes for this order",
-          recipient_address: o.customer.address,
-          recipient_name: o.customer.name,
-          recipient_phone: o.customer.phone,
-        });
-      }
-    });
+  //   orderData.forEach((o) => {
+  //     if (selected.includes(o.id)) {
+  //       updateData.push({
+  //         cod_amount: o.total,
+  //         invoice: o.id,
+  //         note: o.note ?? "No notes for this order",
+  //         recipient_address: o.customer.address,
+  //         recipient_name: o.customer.name,
+  //         recipient_phone: o.customer.phone,
+  //       });
+  //     }
+  //   });
 
-    const response = await steadFeastApi(updateData);
+  //   const response = await steadFeastApi(updateData);
 
-    if (response)
-      return toast({
-        title: "Successfully created order on stead fast!",
-        variant: "success",
-      });
-    toast({
-      title: "Error Occurred!",
-      variant: "destructive",
-    });
-  };
+  //   if (response)
+  //     return toast({
+  //       title: "Successfully created order on stead fast!",
+  //       variant: "success",
+  //     });
+  //   toast({
+  //     title: "Error Occurred!",
+  //     variant: "destructive",
+  //   });
+  // };
 
   const [showPdf, setShowPdf] = useState(false);
 
@@ -349,7 +347,7 @@ const OrderAdmin = () => {
               <Button
                 size="sm"
                 className=" bg-blue-950"
-                onClick={bulkUpdateSteadFast}
+                // onClick={bulkUpdateSteadFast}
               >
                 Stead Fast Export
               </Button>
@@ -435,18 +433,18 @@ const OrderAdmin = () => {
                               .join(", ");
 
                             return {
-                              created_at: String(or.createdAt),
-                              assigned_to: "hello",
-                              customer_address: or.customer.address,
-                              customer_name: or.customer.name,
-                              customer_phone: or.customer.phone,
-                              courier: or.courier ?? "",
-                              invoice: or.id,
-                              products: productName,
-                              shipping: or.shipping ?? "",
-                              amount: or.total,
+                              "Order Date": String(or.createdAt),
+                              "Order Id": or.invoice,
+                              Name: or.customer.name,
+                              Address: or.customer.address,
+                              Number: or.customer.phone,
+                              "Total Amount": or.total,
+                              "Item Name": productName,
+                              Quantity: or.products[0].quantity!,
+                              "Shipping Method": or.shipping!,
                             };
                           });
+
                         setCsvData(data);
                       } else setSelected([]);
                     }}

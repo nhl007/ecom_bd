@@ -4,6 +4,8 @@ dotenv.config({
   path: ".env.local",
 });
 
+import type { Config } from "drizzle-kit";
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   schema: "./src/db/*.schema.ts",
@@ -12,9 +14,11 @@ export default {
   driver: "pg",
   dbCredentials: {
     host: process.env.DB_HOST!,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: process.env.DB_USER!,
+    password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
+    port: 5432,
     ssl: true,
+    // url: process.env.NEON_DATABASE_URL,
   },
 };

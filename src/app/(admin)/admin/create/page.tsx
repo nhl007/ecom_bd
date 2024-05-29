@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { categories, products } from "@/db/products.schema";
+import { calculateDiscountPercentage } from "@/lib/utils";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -30,7 +31,7 @@ const Create = () => {
 
   const [product, setProduct] = useState<typeof products.$inferInsert>({
     price: 0,
-    category: "Alpha Soap",
+    category: "",
     stock: 0,
     name: "",
     discountPrice: 0,
@@ -43,6 +44,14 @@ const Create = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    const percentage = calculateDiscountPercentage(
+      product.price,
+      product.discountPrice ? product.discountPrice : 0
+    );
+    setProduct({ ...product, discountPercentage: percentage });
+  }, [product.price, product.discountPrice]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -19,17 +19,26 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#E4E4E4",
-    padding: "24px",
+    paddingHorizontal: "12px",
+    paddingVertical: "48px",
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
     fontFamily: "Noto Sans Bengali",
+    fontSize: "12px",
+    gap: "12px",
   },
   container: {
     display: "flex",
     flexDirection: "column",
     border: "2px",
     borderColor: "black",
-    padding: "16px",
-    gap: "16px",
-    marginBottom: "32px",
+    padding: "8px",
+    gap: "8px",
+    marginBottom: "12px",
+    maxWidth: "47%",
   },
   header: {
     display: "flex",
@@ -37,12 +46,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   textBold: { fontWeight: "semibold" },
-  headerLeft: {},
-  customerInfo: {},
-  itemHead: {},
   image: {
-    width: "60px",
-    height: "60px",
+    width: "40px",
+    height: "40px",
   },
 });
 
@@ -64,7 +70,7 @@ interface IReactPdfDoc {
 
 export const ReactPdfDoc = ({ data }: IReactPdfDoc) => (
   <Document>
-    <Page size="A4" style={styles.page}>
+    <Page size="A3" style={styles.page}>
       {data.map((o) => (
         <View key={o.invoice} style={styles.container}>
           <View style={styles.header}>
