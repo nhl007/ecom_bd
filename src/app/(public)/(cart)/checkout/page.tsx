@@ -116,7 +116,7 @@ const Page = () => {
       <div className="min-w-full flex md:flex-row flex-col gap-2">
         {/* //? left side */}
 
-        <div className=" flex-1 px-3 py-10 flex flex-col gap-4">
+        <div className=" flex-1 px-3 flex flex-col gap-4">
           <p className=" text-red-600 text-xl font-semibold">
             অর্ডারটি কনফার্ম করতে আপনার নাম, ঠিকানা, মোবাইল নাম্বার, লিখে অর্ডার
             কনফার্ম করুন বাটনে ক্লিক করুন
@@ -131,7 +131,11 @@ const Page = () => {
             <Label htmlFor="phone">
               আপনার মোবাইল<sup className=" text-red-500">*</sup>
             </Label>
-            <Input onChange={handleCustomerDataChange} name="phone" />
+            <Input
+              onChange={handleCustomerDataChange}
+              type="number"
+              name="phone"
+            />
           </div>
           <div className=" flex flex-col gap-2">
             <Label htmlFor="street">
@@ -143,28 +147,34 @@ const Page = () => {
             <Label htmlFor="ship">
               আপনার এরিয়া সিলেক্ট করুন<sup className=" text-red-500">*</sup>
             </Label>
-            <div className="flex justify-between border-b-[1px] py-3">
-              <select
-                onChange={(e) => {
-                  const data = e.target.value.split("/");
-                  updateShipping(data[0], Number(data[1]));
-                }}
-                className=" px-3 py-2.5 rounded-md border"
-              >
-                {ship?.map((sh, i) => (
-                  <option
-                    key={sh.name}
-                    value={sh.name + "/" + sh.cost}
-                    selected={i === 0}
-                  >
-                    {sh.name + ` ( ${sh.cost} ) `}
-                  </option>
-                ))}
-              </select>
+            <div className="flex gap-4 pt-2 items-center">
+              {ship.map((sh) => (
+                <div
+                  key={sh.name + sh.serial}
+                  className="flex gap-2  items-center"
+                >
+                  <input
+                    checked={cart.shipping === sh.name ? true : false}
+                    onChange={(e) => updateShipping(e.target.value, sh.cost)}
+                    value={sh.name}
+                    type="radio"
+                    className="w-4 h-4"
+                  />
+                  <label>{sh.name + ` (${sh.cost}৳)`}</label>
+                </div>
+              ))}
             </div>
           </div>
+          <Button
+            loader={loading}
+            className="mb-2 inline-block md:hidden"
+            disabled={loading}
+            onClick={createOrder}
+          >
+            অর্ডার কনফার্ম করুন
+          </Button>
 
-          <div className=" flex flex-col gap-2">
+          <div className=" md:flex flex-col gap-2 hidden">
             <Label htmlFor="note">
               Order Notes <sup className=" text-red-500">*</sup>
             </Label>
@@ -223,6 +233,15 @@ const Page = () => {
             <p className=" bg-white py-3 px-4 rounded-lg font-semibold">
               Pay with cash upon delivery.
             </p>
+            <div className=" flex flex-col gap-2 md:hidden">
+              <Label htmlFor="note">Order Notes</Label>
+              <textarea
+                onChange={(e) => setNote(e.target.value)}
+                name="note"
+                rows={3}
+                className=" outline-none border-[1px] rounded-md pl-2"
+              />
+            </div>
           </div>
           <Button loader={loading} disabled={loading} onClick={createOrder}>
             অর্ডার কনফার্ম করুন

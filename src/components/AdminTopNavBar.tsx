@@ -14,9 +14,9 @@ const AdminTopNavBar = async () => {
         <Image
           src={pref?.logo.url ?? "/logo.png"}
           alt="logo"
-          height="60"
-          width="60"
-          className=" w-[60px] max-h-[60px] rounded-full"
+          height="100"
+          width="100"
+          className=" w-[100px] max-h-[80px] rounded-full"
         />
       </Link>
       <AdminProfileDropdown session={session} />

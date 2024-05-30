@@ -34,26 +34,27 @@ const page = async ({ params: { prodId } }: { params: { prodId: string } }) => {
           </div>
           <div className=" flex-1 flex flex-col gap-4 md:p-6">
             <h1 className=" text-2xl md:text-3xl">{product.name}</h1>
-            <p className=" text-black font-semibold flex items-center gap-2 text-2xl">
-              মূল্য:{" "}
-              {product.discountPrice && (
-                <span className=" line-through text-xl text-gray-400 font-semibold">
-                  {product.price}৳
-                </span>
-              )}
-              {product.discountPrice ? product.discountPrice : product.price}৳
-            </p>
+            <div className="flex gap-4 md:w-[70%] flex-wrap">
+              <p className=" text-black font-semibold flex items-center gap-2 text-2xl">
+                মূল্য:
+                {product.discountPrice && (
+                  <span className=" line-through text-xl text-gray-400 font-semibold">
+                    {product.price}৳
+                  </span>
+                )}
+                {product.discountPrice ? product.discountPrice : product.price}৳
+              </p>
+              <ProductPageButtons {...product} />
+            </div>
+
             {product.stock > 0 ? (
-              <>
-                <p className=" text-green-400 font-semibold">
-                  স্টক : ইন স্টক {`(${product.stock})`}
-                </p>
-                <ProductPageButtons {...product} />
-              </>
+              <p className=" text-green-400 font-semibold">
+                স্টক : ইন স্টক {`(${product.stock})`}
+              </p>
             ) : (
               <p className=" text-red-500 font-semibold">স্টক : স্টক শেষ</p>
             )}
-            <div className=" flex flex-col gap-4 text-xl md:text-2xl text-red-400 mt-4">
+            <div className=" flex flex-col gap-2 text-xl md:text-2xl text-red-400">
               <p className=" flex items-center gap-2">
                 <ContactIcon /> ফোনে অর্ডারের জন্য ডায়াল করুন
               </p>
@@ -69,7 +70,7 @@ const page = async ({ params: { prodId } }: { params: { prodId: string } }) => {
               return (
                 <div
                   key={sh.name}
-                  className=" flex justify-between border-y-2 py-3 text-xl"
+                  className=" flex justify-between border-y-2 py-1.5"
                 >
                   <p>{sh.name}</p>
                   <p> ৳ {sh.cost}</p>

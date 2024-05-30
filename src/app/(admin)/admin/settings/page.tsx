@@ -45,32 +45,35 @@ const Settings = () => {
 
   const submitPixelCode = async () => {
     let img = image;
-    if (imagePreview) {
-      const res = await uploadImage(imagePreview);
-      if (res) {
-        img = {
-          id: res.id,
-          url: res?.url!,
-        };
-      }
-    }
-    const data = await setPreferences({
-      address: address,
-      phone: phone,
-      pixelScript: pixel,
-      copyRight: copyright,
-      logo: img,
-    });
-    // const data = true;
-    if (!data)
-      return toast({
-        title: "Error",
-        variant: "destructive",
-      });
 
-    toast({
-      title: "Settings updated!",
-      variant: "success",
+    startTran(async () => {
+      if (imagePreview) {
+        const res = await uploadImage(imagePreview);
+        if (res) {
+          img = {
+            id: res.id,
+            url: res?.url!,
+          };
+        }
+      }
+      const data = await setPreferences({
+        address: address,
+        phone: phone,
+        pixelScript: pixel,
+        copyRight: copyright,
+        logo: img,
+      });
+      // const data = true;
+      if (!data)
+        toast({
+          title: "Error",
+          variant: "destructive",
+        });
+      else
+        toast({
+          title: "Settings updated!",
+          variant: "success",
+        });
     });
   };
 
@@ -151,7 +154,13 @@ const Settings = () => {
           rows={6}
         />
       </div>
-      <Button onClick={() => submitPixelCode()}>Save</Button>
+      <Button
+        loader={pending}
+        disabled={pending}
+        onClick={() => submitPixelCode()}
+      >
+        Save
+      </Button>
     </div>
   );
 };

@@ -57,9 +57,9 @@ const NavBar = () => {
           <Image
             src={logo}
             alt="logo"
-            height="80"
-            width="80"
-            className=" w-[60px] max-h-[60px] md:w-[80px] md:max-h-[80px] rounded-full"
+            height="100"
+            width="100"
+            className=" w-[80px] max-h-[60px] md:w-[100px] md:max-h-[80px]"
           />
         </Link>
         <div className="hidden md:block">
