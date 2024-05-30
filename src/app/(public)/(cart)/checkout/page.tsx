@@ -24,6 +24,8 @@ const Page = () => {
 
   const [loading, startTransition] = useTransition();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const [ship, setShip] = useState<(typeof shipping.$inferSelect)[]>([]);
 
   const getShippingInfo = async () => {
@@ -68,10 +70,10 @@ const Page = () => {
         description: `Invalid value  of field district!`,
         variant: "destructive",
       });
-    if (!customer.phone || customer.phone.length < 11)
+    if (!customer.phone || customer.phone.length !== 11)
       return toast({
         title: "Invalid Information!",
-        description: `Invalid value of field phone!`,
+        description: `Invalid Phone Number!`,
         variant: "destructive",
       });
     if (!cart.products.length)
@@ -83,12 +85,14 @@ const Page = () => {
 
     const delivery = ship.find((sh) => sh.name === cart.shipping);
 
+    setIsLoading(true);
     const data = await createNewOrder({
       ...cart,
       customer: customer,
       note: note,
       delivery: delivery?.cost!,
     });
+    setIsLoading(false);
     if (data.success) {
       clearCart();
       router.push(`/order-complete?order=${data.message}`);
@@ -166,9 +170,9 @@ const Page = () => {
             </div>
           </div>
           <Button
-            loader={loading}
+            loader={isLoading}
+            disabled={isLoading}
             className="mb-2 inline-block md:hidden"
-            disabled={loading}
             onClick={createOrder}
           >
             অর্ডার কনফার্ম করুন
@@ -243,7 +247,7 @@ const Page = () => {
               />
             </div>
           </div>
-          <Button loader={loading} disabled={loading} onClick={createOrder}>
+          <Button loader={isLoading} disabled={isLoading} onClick={createOrder}>
             অর্ডার কনফার্ম করুন
           </Button>
         </div>

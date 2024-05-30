@@ -13,9 +13,15 @@ import {
   unstable_noStore as noStore,
   unstable_cache as cache,
   revalidateTag,
-  revalidatePath,
 } from "next/cache";
 import { uploadImage } from "./cloudinary";
+
+export async function getIPAddress() {
+  noStore();
+  const res = await fetch("https://api.ipify.org?format=json");
+  const ip = await res.json();
+  return ip.ip as string;
+}
 
 export const getProductsById = cache(
   async (id: string) => {
@@ -111,6 +117,25 @@ export const createNewOrder = async (
   data: Omit<typeof orders.$inferInsert, "invoice">
 ) => {
   try {
+    const ip = await getIPAddress();
+
+    const now = new Date();
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const cus = await db
+      .select({
+        cus: orders.customer,
+      })
+      .from(orders)
+      .where(gte(orders.createdAt, last24Hours));
+
+    const totalOrdersToday = cus.reduce((acc, d) => {
+      if (d.cus.ip?.trim() === ip.trim()) return acc + 1;
+      else return acc + 0;
+    }, 0);
+
+    if (totalOrdersToday > 2)
+      return { success: false, message: "Already Ordered 3 times today!" };
+
     const prev = await db
       .select({ serial: orders.serial })
       .from(orders)
@@ -121,7 +146,14 @@ export const createNewOrder = async (
 
     const order = await db
       .insert(orders)
-      .values({ ...data, invoice: sku })
+      .values({
+        ...data,
+        invoice: sku,
+        customer: {
+          ...data.customer,
+          ip: ip,
+        },
+      })
       .returning({ id: orders.id });
 
     data.products.forEach((element) => {

@@ -53,6 +53,7 @@ type TCustomer = {
   name: string;
   phone: string;
   address: string;
+  ip?: string;
 };
 
 type TProductOrder = Pick<
