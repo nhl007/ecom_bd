@@ -1,5 +1,6 @@
 "use client";
 
+import { getAllShipping } from "@/actions/preference";
 import {
   getAllCouriers,
   getOrderById,
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { shipping } from "@/db/preferences.schema";
 import { couriers, products } from "@/db/products.schema";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -56,7 +58,7 @@ const AdminOrderCreate = () => {
 
   const [pending, startTransition] = useTransition();
 
-  const [shipping, setShipping] = useState("");
+  const [shippingMethod, setShippingMethod] = useState("");
 
   const createOrder = async () => {
     if (customer.name.length < 3)
@@ -104,7 +106,7 @@ const AdminOrderCreate = () => {
       count: cartProducts.length,
       discount: discount,
       delivery: delivery,
-      shipping: shipping,
+      shipping: shippingMethod,
     });
 
     setLoading(false);
@@ -123,6 +125,8 @@ const AdminOrderCreate = () => {
     });
   };
 
+  const [ship, setShip] = useState<(typeof shipping.$inferSelect)[]>([]);
+
   const initOrderEdit = async () => {
     const current = await getOrderById(id as string);
     if (!current) return redirect("/admin/orders");
@@ -134,8 +138,7 @@ const AdminOrderCreate = () => {
       setNote(current.note ?? "");
       setDelivery(current.delivery ?? 0);
       setDiscount(current.discount ?? 0);
-      setShipping(current.shipping ?? "Inside Dhaka");
-
+      setShippingMethod(current.shipping ?? "Inside Dhaka");
       const prod = await getProducts(true);
       if (prod) setProductsList(prod);
       const courier = await getAllCouriers();
@@ -145,6 +148,19 @@ const AdminOrderCreate = () => {
 
   useEffect(() => {
     initOrderEdit();
+  }, []);
+
+  const getShippingInfo = async () => {
+    startTransition(async () => {
+      const fShip = await getAllShipping();
+      if (fShip) {
+        setShip(fShip);
+      }
+    });
+  };
+
+  useEffect(() => {
+    getShippingInfo();
   }, []);
 
   const handleCustomerDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,6 +221,29 @@ const AdminOrderCreate = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className=" flex flex-col gap-2">
+            <Label htmlFor="ship">Select Shipping Method</Label>
+            <div className="flex gap-4 pt-2 items-center">
+              {ship.map((sh) => (
+                <div
+                  key={sh.name + sh.serial}
+                  className="flex gap-2  items-center"
+                >
+                  <input
+                    checked={shippingMethod === sh.name ? true : false}
+                    onChange={(e) => setShippingMethod(e.target.value)}
+                    value={sh.name}
+                    type="radio"
+                    className="w-4 h-4"
+                  />
+                  <label className=" text-sm">
+                    {sh.name + ` (${sh.cost}৳)`}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className=" flex flex-col gap-2">

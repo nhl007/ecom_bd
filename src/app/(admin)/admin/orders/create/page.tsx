@@ -1,5 +1,6 @@
 "use client";
 
+import { getAllShipping } from "@/actions/preference";
 import {
   createNewOrder,
   getAllCouriers,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { shipping } from "@/db/preferences.schema";
 import { couriers, products } from "@/db/products.schema";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -102,6 +104,7 @@ const AdminOrderCreate = () => {
       discount: discount,
       assigned: session.data?.user.name,
       delivery: delivery,
+      shipping: selectedMethod,
     });
 
     setLoading(false);
@@ -120,10 +123,19 @@ const AdminOrderCreate = () => {
     });
   };
 
+  const [selectedMethod, setSelectedMethod] = useState("");
+
+  const [ship, setShip] = useState<(typeof shipping.$inferSelect)[]>([]);
+
   const initOrderEdit = async () => {
     startTransition(async () => {
       const prod = await getProducts(true);
       if (prod) setProductsList(prod);
+      const ship = await getAllShipping();
+      if (ship) {
+        setShip(ship);
+        setSelectedMethod(ship[0].name);
+      }
       const cur = await getAllCouriers();
       if (cur) setCourierList(cur);
     });
@@ -179,6 +191,28 @@ const AdminOrderCreate = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className=" flex flex-col gap-2">
+            <Label htmlFor="ship">Select Shipping Method</Label>
+            <div className="flex gap-4 pt-2 items-center">
+              {ship.map((sh) => (
+                <div
+                  key={sh.name + sh.serial}
+                  className="flex gap-2  items-center"
+                >
+                  <input
+                    checked={selectedMethod === sh.name ? true : false}
+                    onChange={(e) => setSelectedMethod(e.target.value)}
+                    value={sh.name}
+                    type="radio"
+                    className="w-4 h-4"
+                  />
+                  <label className=" text-sm">
+                    {sh.name + ` (${sh.cost}৳)`}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className=" flex flex-col gap-2">

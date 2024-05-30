@@ -46,11 +46,17 @@ const Create = () => {
   };
 
   useEffect(() => {
-    const percentage = calculateDiscountPercentage(
-      product.price,
-      product.discountPrice ? product.discountPrice : 0
-    );
-    setProduct({ ...product, discountPercentage: percentage });
+    if (
+      product.price > 0 &&
+      product.discountPrice &&
+      product.discountPrice > 0
+    ) {
+      const percentage = calculateDiscountPercentage(
+        product.price,
+        product.discountPrice
+      );
+      setProduct({ ...product, discountPercentage: percentage });
+    }
   }, [product.price, product.discountPrice]);
 
   const onSubmit = async (e: React.FormEvent) => {
