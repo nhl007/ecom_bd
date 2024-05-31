@@ -16,7 +16,7 @@ const Product = ({
   category,
   stock,
 }: typeof products.$inferSelect) => {
-  const { addToCart, clearCart } = useCartContext();
+  const { addToCart } = useCartContext();
 
   const router = useRouter();
 
@@ -53,7 +53,6 @@ const Product = ({
       <Button
         className="z-50"
         onClick={() => {
-          clearCart();
           addToCart({
             name,
             price: discountPrice ? discountPrice : price,

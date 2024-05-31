@@ -55,11 +55,14 @@ const NavBar = () => {
 
         <Link href="/">
           <Image
-            src={logo}
+            src={logo ? logo : "/logo.png"}
             alt="logo"
             height="100"
             width="100"
-            className=" w-[80px] max-h-[60px] md:w-[100px] md:max-h-[80px]"
+            className={cn(
+              " w-[80px] max-h-[60px] md:w-[100px] md:max-h-[80px]",
+              loading ? "animate-pulse opacity-20" : null
+            )}
           />
         </Link>
         <div className="hidden md:block">

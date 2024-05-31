@@ -74,22 +74,22 @@ export const CartContextProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const addToCart = (product: TCartProduct) => {
-    const exists = state.products.find((p) => p.id === product.id);
+    // const exists = state.products.find((p) => p.id === product.id);
 
-    if (exists) {
-      if (exists.stock < 1)
-        return toast({
-          variant: "destructive",
-          title: "This product is currently out of stock!",
-        });
+    // if (exists) {
+    //   if (exists.stock < 1)
+    //     return toast({
+    //       variant: "destructive",
+    //       title: "This product is currently out of stock!",
+    //     });
 
-      return toast({
-        variant: "destructive",
-        title: "Product Already on Cart!",
-      });
-    }
+    //   return toast({
+    //     variant: "destructive",
+    //     title: "Product Already on Cart!",
+    //   });
+    // }
 
-    const newProducts = [...state.products, product];
+    const newProducts = [product];
 
     const total = newProducts.reduce((acc, p) => {
       return (
