@@ -5,7 +5,6 @@ import db from "@/configs/db";
 import { DEFAULT_REDIRECT_URL } from "@/constants/routes";
 import { users } from "@/db/users.schema";
 import { getUserByEmail } from "@/db/users.query";
-import { generatePasswordResetVerificationToken } from "@/lib/token";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
 import { AuthError } from "next-auth";
@@ -97,24 +96,6 @@ export const signInUser = async (user: Omit<TUser, "name">) => {
       return "Invalid Credentials !";
 
     throw error;
-  }
-};
-export const resetPassword = async (email: string) => {
-  if (!email) return "Missing fields!";
-
-  try {
-    const existingUser = await getUserByEmail(email);
-    if (!existingUser) return "No user found with this email!";
-
-    const sent = await generatePasswordResetVerificationToken(
-      existingUser.name,
-      existingUser.email
-    );
-
-    if (sent) return "Password reset email sent!";
-    else return "Error Occurred!";
-  } catch (error: any) {
-    return "Error Occurred!";
   }
 };
 
