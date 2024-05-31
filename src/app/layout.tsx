@@ -6,9 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Burnamala",
+  title: "DropShopBD",
   description:
-    "Burnamala is an innovative online destination to meet most of your requirements. We also provide products at wholesale rates for your bulk requirements.",
+    "DropShopBD is an innovative online destination to meet most of your requirements. We also provide products at wholesale rates for your bulk requirements.",
   icons: {
     icon: ["/favicon.ico?v=4"],
     apple: ["/apple-touch-icon.png?v=4"],

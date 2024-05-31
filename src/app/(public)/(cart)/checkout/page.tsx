@@ -172,7 +172,7 @@ const Page = () => {
           <Button
             loader={isLoading}
             disabled={isLoading}
-            className="mb-2 inline-block md:hidden"
+            className="my-2 inline-block md:hidden text-[18px]"
             onClick={createOrder}
           >
             অর্ডার কনফার্ম করুন
