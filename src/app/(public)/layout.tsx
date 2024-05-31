@@ -25,7 +25,7 @@ const publicLayout = async ({ children }: TOnlyReactChildren) => {
       )}
       <CartContextProvider>
         <NavBar />
-        {children}
+        <div className=" min-h-svh">{children}</div>
         <Footer />
       </CartContextProvider>
     </main>

@@ -173,6 +173,47 @@ export const createNewOrder = async (
   }
 };
 
+export const createNewOrderAdmin = async (
+  data: Omit<typeof orders.$inferInsert, "invoice">
+) => {
+  try {
+    const prev = await db
+      .select({ serial: orders.serial })
+      .from(orders)
+      .orderBy(desc(orders.serial))
+      .limit(1);
+
+    const sku = "INV" + (prev.length ? prev[0].serial + 1 : "1");
+
+    const order = await db
+      .insert(orders)
+      .values({
+        ...data,
+        invoice: sku,
+        customer: {
+          ...data.customer,
+          ip: "",
+        },
+      })
+      .returning({ id: orders.id });
+
+    data.products.forEach((element) => {
+      db.update(products)
+        .set({
+          quantity: sql`${products.quantity} - ${element.quantity}`,
+        })
+        .where(eq(products.id, element.id!));
+    });
+
+    revalidateTag("orders");
+    revalidateTag("ind-product");
+    revalidateTag("dashboard");
+    return { success: true, message: order[0].id };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+};
+
 export const updateOrderById = async (
   id: string,
   data: Omit<typeof orders.$inferInsert, "invoice">

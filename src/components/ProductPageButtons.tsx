@@ -22,6 +22,7 @@ const ProductPageButtons = ({
   return (
     <>
       <Button
+        size="lg"
         onClick={() => {
           addToCart({
             name,

@@ -2,7 +2,7 @@
 
 import { getAllShipping } from "@/actions/preference";
 import {
-  createNewOrder,
+  createNewOrderAdmin,
   getAllCouriers,
   getProducts,
 } from "@/actions/products";
@@ -94,7 +94,7 @@ const AdminOrderCreate = () => {
       0
     );
 
-    const data = await createNewOrder({
+    const data = await createNewOrderAdmin({
       products: cartProducts,
       total: total - discount + delivery,
       courier: courierCus ? courierCus : undefined,

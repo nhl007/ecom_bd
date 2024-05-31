@@ -52,7 +52,13 @@ import {
 import { couriers, orders, orderStatusEnum } from "@/db/products.schema";
 import { cn } from "@/lib/utils";
 import { PDFViewer } from "@react-pdf/renderer";
-import { DeleteIcon, FileEditIcon, PrinterIcon, X } from "lucide-react";
+import {
+  DeleteIcon,
+  FileEditIcon,
+  PrinterIcon,
+  Trash2Icon,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "@/components/ui/use-toast";
 import AdminDashBoardInfoBox from "@/components/AdminDashBoardInfoBox";
@@ -61,6 +67,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { CSVLink } from "react-csv";
 import { getAllUsersName } from "@/actions/authentication";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 type IReactPdfDoc = Pick<
   typeof orders.$inferSelect,
@@ -189,7 +196,7 @@ const OrderAdmin = () => {
     };
 
     orderDataInit();
-  }, []);
+  }, [orderData]);
 
   const handleCheckboxChange = (id: string) => {
     setSelected((prevState) => {
@@ -286,8 +293,41 @@ const OrderAdmin = () => {
     getAllUsersList();
   }, []);
 
+  const [fullScreenModal, setFullScreenModal] = useState(false);
+
+  const deleteOrder = async () => {
+    const curr = orderData.filter((data) => selected.includes(data.id));
+
+    startTransition(async () => {
+      for (const order of curr) {
+        const succ = await deleteOrderById(order.id);
+        if (!succ) return;
+      }
+
+      const newOrders = orderData.filter((data) => !selected.includes(data.id));
+      setOrdersData(newOrders);
+      setSelected([]);
+      setFullScreenModal(false);
+    });
+  };
+
   return (
     <div>
+      {fullScreenModal && (
+        <ConfirmationModal setModal={setFullScreenModal}>
+          <div className=" flex flex-col gap-4">
+            <p className=" text-lg font-semibold">Are you sure?</p>
+            <Button
+              onClick={async () => {
+                await deleteOrder();
+              }}
+              className=" bg-red-400 w-fit"
+            >
+              Confirm
+            </Button>
+          </div>
+        </ConfirmationModal>
+      )}
       {showPdf && (
         <FullScreenModal modalCloseValue={false} setModal={setShowPdf}>
           <PDFViewer showToolbar width="80%" height={600}>
@@ -345,17 +385,16 @@ const OrderAdmin = () => {
                 Add Order
               </Link>
               <Button
-                size="sm"
                 className=" bg-blue-950"
                 // onClick={bulkUpdateSteadFast}
               >
                 Stead Fast Export
               </Button>
-              <Button size="sm" className="bg-teal-900" onClick={bulkPrintPdf}>
+              <Button className="bg-teal-900" onClick={bulkPrintPdf}>
                 Print invoice
               </Button>
               <CSVLink
-                className=" text-sm bg-lime-700 text-white px-3 py-2 rounded-sm"
+                className=" text-sm bg-lime-700 text-white px-3 py-1 inline-flex items-center justify-center rounded-sm"
                 data={csvData}
                 filename="oasis.xls"
                 onClick={() => {
@@ -370,6 +409,20 @@ const OrderAdmin = () => {
               >
                 Export Excel
               </CSVLink>
+              <Button
+                onClick={() => {
+                  if (selected.length < 1)
+                    return toast({
+                      title: "Please select a row first!",
+                      variant: "destructive",
+                    });
+                  setFullScreenModal(true);
+                }}
+                variant="outline"
+                size="icon"
+              >
+                <Trash2Icon color="red" />
+              </Button>
             </div>
             <div className=" flex gap-3">
               <Select
@@ -606,21 +659,9 @@ const OrderAdmin = () => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={async () => {
-                        const succ = await deleteOrderById(o.id);
-                        if (succ) {
-                          setOrdersData(
-                            orderData.filter((order) => order.id !== o.id)
-                          );
-                          toast({
-                            variant: "success",
-                            title: "Deleted Order Successfully!",
-                          });
-                        } else
-                          toast({
-                            variant: "destructive",
-                            title: "Error Occurred!",
-                          });
+                      onClick={() => {
+                        setSelected([o.id]);
+                        setFullScreenModal(true);
                       }}
                     >
                       <DeleteIcon color="red" size={22} />

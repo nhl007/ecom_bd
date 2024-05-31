@@ -11,11 +11,14 @@ const page = async ({ params: { prodId } }: { params: { prodId: string } }) => {
   const product = await getProductsById(prodId);
   const ship = await getAllShipping(true);
 
-  if (!product) return <p>No product with this id</p>;
+  if (!product)
+    return (
+      <p className="text-4xl my-auto text-center">No product with this id</p>
+    );
 
   return (
-    <main className=" md:pb-10 mb-8 md:mb-0">
-      <MaxWidthWrapper>
+    <main className=" md:pb-10 mb-8 md:mb-0 min-h-[screen]">
+      <MaxWidthWrapper className=" h-full">
         <p className=" flex flex-wrap gap-2 items-center md:mt-4 mt-1 mb-2 text-xs md:text-base font-medium">
           <Link href="/">Home</Link>
           <ArrowRightIcon size={18} />
