@@ -24,8 +24,8 @@ const page = async () => {
       <MaxWidthWrapper>
         {hotDeals ? (
           <div>
-            <h1 className=" text-2xl mt-12 font-semibold">Hot Deals</h1>
-            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-10 md:gap-y-6">
+            <h1 className=" text-2xl mt-6 lg:mt-12 font-semibold">Hot Deals</h1>
+            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-6 lg:my-10 md:gap-y-6">
               {hotDeals.map((prod) => (
                 <Product key={prod.id} {...prod} />
               ))}
@@ -35,7 +35,7 @@ const page = async () => {
         {homeGadgets ? (
           <div>
             <h1 className=" text-2xl mt-12 font-semibold">Home And Gadgets</h1>
-            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-10 md:gap-y-6">
+            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-6 lg:my-10 md:gap-y-6">
               {homeGadgets.map((prod) => (
                 <Product key={prod.id} {...prod} />
               ))}
@@ -45,7 +45,7 @@ const page = async () => {
         {healthBeauty ? (
           <div>
             <h1 className=" text-2xl mt-12 font-semibold">Health & Beauty</h1>
-            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-10 md:gap-y-6">
+            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-6 lg:my-10 md:gap-y-6">
               {healthBeauty.map((prod) => (
                 <Product key={prod.id} {...prod} />
               ))}
@@ -55,7 +55,7 @@ const page = async () => {
         {babyProducts ? (
           <div>
             <h1 className=" text-2xl mt-12 font-semibold">Baby Products</h1>
-            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-10 md:gap-y-6">
+            <div className="no-scrollbar md:grid md:grid-cols-4 flex gap-4 overflow-x-scroll my-6 lg:my-10 md:gap-y-6">
               {babyProducts.map((prod) => (
                 <Product key={prod.id} {...prod} />
               ))}

@@ -44,11 +44,11 @@ const Footer = async () => {
             <Link href="/replace-refund">Replace & Refund</Link>
             <Link href="/">Terms & Conditions</Link>
           </div>
-          <div className=" flex flex-col gap-2 text-sm md:text-base">
+          {/* <div className=" flex flex-col gap-2 text-sm md:text-base">
             <span className=" md:text-lg font-semibold">Top Category</span>
             <Link href="/Health And Beauty">Health And Beauty</Link>
             <Link href="/Alpha Soap">Alpha Soap</Link>
-          </div>
+          </div> */}
 
           <div className=" flex flex-col gap-2 mt-2 md:mt-0">
             <span className=" md:text-lg font-semibold">Payment System</span>

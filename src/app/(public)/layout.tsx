@@ -7,9 +7,6 @@ import { Suspense } from "react";
 
 const publicLayout = async ({ children }: TOnlyReactChildren) => {
   const pixelCode = await getPixelCode();
-
-  console.log(pixelCode);
-
   return (
     <main>
       {pixelCode && (

@@ -7,7 +7,14 @@ import { ProductCategories } from "@/constants/product";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useTransition } from "react";
-import { HomeIcon, Menu, PhoneCallIcon, X } from "lucide-react";
+import {
+  FireExtinguisherIcon,
+  Flame,
+  HomeIcon,
+  Menu,
+  PhoneCallIcon,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import CartIcon from "./CartIcon";
 import { categories } from "@/db/products.schema";
@@ -47,12 +54,6 @@ const NavBar = () => {
     <nav className=" flex flex-col">
       {loading && <LoadingSpinner />}
       <MaxWidthWrapper className="flex w-full justify-between py-4 items-center">
-        <Menu
-          onClick={() => setMenu(true)}
-          className=" text-main_accent md:hidden"
-          size={32}
-        />
-
         <Link href="/">
           <Image
             src={logo ? logo : "/logo.png"}
@@ -65,11 +66,16 @@ const NavBar = () => {
             )}
           />
         </Link>
+        <Menu
+          onClick={() => setMenu(true)}
+          className=" text-main_accent md:hidden"
+          size={32}
+        />
         <div className="hidden md:block">
           <SearchBar setMenu={setMenu} />
         </div>
 
-        <div className=" flex gap-1 md:gap-4">
+        <div className="hidden md:flex gap-1 md:gap-4">
           {phone ? (
             <a
               href={`tel:${phone}`}
@@ -89,7 +95,7 @@ const NavBar = () => {
               09649809080
             </a>
           )}
-          <CartIcon />
+          {/* <CartIcon /> */}
         </div>
 
         {menu && (
@@ -189,7 +195,10 @@ const NavBar = () => {
             <span>Call Now</span>
           </a>
         )}
-        <CartIcon />
+        <Link href="/category/Hot Offer">
+          <Flame color="orange" className=" mx-auto" />
+          <span>Hot Offer</span>
+        </Link>
       </div>
     </nav>
   );

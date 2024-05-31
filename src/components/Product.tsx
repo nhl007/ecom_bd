@@ -33,7 +33,7 @@ const Product = ({
         alt="product"
         width={283}
         height={283}
-        className="flex max-w-full max-h-[150px] md:w-[283px] md:max-h-[283px] md:h-[283px] rounded-xl object-cover"
+        className="flex max-w-full h-[150px] max-h-[150px] md:w-[283px] md:max-h-[283px] md:h-[283px] rounded-xl object-cover"
       />
       <p
         onClick={() => router.push(`/product/${id}`)}

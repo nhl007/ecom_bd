@@ -37,7 +37,7 @@ const HomeFeaturedCarousel = () => {
     <Carousel
       plugins={[plugin.current]}
       className={cn(
-        " min-w-full mt-6 lg:min-h-[300px]",
+        " min-w-full md:mt-6 lg:min-h-[300px]",
         loading ? "animate-pulse" : "animate-none"
       )}
       opts={{
