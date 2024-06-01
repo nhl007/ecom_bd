@@ -84,6 +84,13 @@ const AdminOrderCreate = () => {
         variant: "destructive",
       });
 
+    if (!courierCus)
+      return toast({
+        title: "Please select courier!",
+        description: `Please assign the order to the courier provider!`,
+        variant: "destructive",
+      });
+
     setLoading(true);
 
     const total = cartProducts.reduce(
